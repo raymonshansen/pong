@@ -68,12 +68,14 @@ int main (int argc, char** argv){
     	printf("Fatal error in creation of ball!\n");
     }
 //-------------------------------------- Keyboard checks -------------------------------------
+	// Variable to escape the Keyboard loop.
 	int sjekk = 0;
-	
-
+	// Name of event to check for is "e"
 	SDL_Event e;
-
+	// Pointer to the keyboard array
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
+	// Variable to determine if ball should move or not.
+	int ballmove = 0;
 
 	while(!sjekk){
 		while( SDL_PollEvent( &e ) != 0 ){
@@ -97,6 +99,7 @@ int main (int argc, char** argv){
 	    SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
 
 	    // ------------------ MOVING RIGHTPADDLE UP -----------------
+
 	    if (state[SDL_SCANCODE_UP]){
 	        //Move startingpoint of rightpaddle ONE pixel UP.
 	        rightpaddle->paddle.y-=1;
@@ -109,6 +112,7 @@ int main (int argc, char** argv){
 			DrawPaddle(renderer, rightpaddle, leftpaddle);
 	    }
 	    //-------------- MOVING RIGHTPADDLE DOWN ---------------
+
     	if (state[SDL_SCANCODE_DOWN]){
         	//Move startingpoint of rightpaddle ONE pixel DOWN.
         	rightpaddle->paddle.y+=1;
@@ -122,6 +126,7 @@ int main (int argc, char** argv){
         }
 
         //------------- MOVING LEFTPADDLE UP -------------------
+
     	if (state[SDL_SCANCODE_W]){
         	//Move startingpoint of leftpaddle ONE pixel UP
         	leftpaddle->paddle.y-=1;
@@ -135,6 +140,7 @@ int main (int argc, char** argv){
         }
 
         //------------- MOVING LEFTPADDLE DOWN -------------------
+
     	if (state[SDL_SCANCODE_S]){
         	//Move startingpoint of leftpaddle ONE pixel DOWN
         	leftpaddle->paddle.y+=1;
@@ -147,6 +153,41 @@ int main (int argc, char** argv){
             DrawPaddle(renderer, rightpaddle, leftpaddle);
         }
 
+
+	    //-------------- Handling ball movement -------------------------
+	    // Ball does not start moving untill user pushes "I"
+	    if (state[SDL_SCANCODE_I]){
+	    	ballmove = 1;	
+	    }
+	    if (ballmove != 0){
+		    ballen->ballx+=ballen->speedx;
+			ballen->bally+=ballen->speedy;
+			// The ball should disappear if it goes off either edge of the window...
+			// The ball should bounce back if it hits the "roof" or "floor"
+			if (ballen->bally>=(HEIGHT-ballen->radius) || ballen->bally<=(0+ballen->radius))
+				ballen->speedy*=-1;
+			//-------------------- Hitting the RIGHT PADDLE ----------------------
+			// Setting variables
+			int ballrightedgex = ballen->ballx+ballen->radius;
+			int ballrightedgey = ballen->bally;
+			int i;
+			for (i = 0; i < PADDLEHEIGHT; i++){
+				if ((ballrightedgex = rightpaddle->paddle.x) && (ballrightedgey = (rightpaddle->paddle.y+i ))){
+					ballen->speedx*=-1;
+				}	
+			}
+			// ------------------- Hitting the LEFT PADDLE -----------------------
+			// Setting variables
+			int ballleftedgex = ballen->ballx-ballen->radius;
+			int ballleftedgey = ballen->bally;
+			int t;
+			for (t = 0; t < PADDLEHEIGHT; t++){
+			 	if ((ballleftedgex = leftpaddle->paddle.x+PADDLEWIDTH) && (ballleftedgey = (leftpaddle->paddle.y+t))){
+					ballen->speedx*=-1;
+				}
+				ballleftedgey++;
+			}
+		}
         // If no user provides any input, the paddles must still be drawn!
         // Set the color for the paddles
 	    SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
@@ -157,15 +198,6 @@ int main (int argc, char** argv){
 	    DrawBall(renderer, ballen);
 	    // Updating screen with everything we have drawn...
 	    SDL_RenderPresent(renderer);
-
-	    //-------------- Handling ball movement -------------------------
-	    ballen->ballx+=ballen->speedx;
-		ballen->bally+=ballen->speedy;
-		if (ballen->ballx>=(WIDTH-ballen->radius) || ballen->ballx<=(0+ballen->radius))
-			ballen->speedx*=-1;
-		if (ballen->bally>=(HEIGHT-ballen->radius) || ballen->bally<=(0+ballen->radius))
-			ballen->speedy*=-1;
-
 	}
 	// Removing paddles 
     Destroy_player(leftpaddle);
