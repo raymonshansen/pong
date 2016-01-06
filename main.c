@@ -4,6 +4,7 @@
 #include <math.h>
 #include "ball.h"
 #include "paddle.h"
+#include "collision.h"
 
 #define WIDTH 1200
 #define HEIGHT 700
@@ -174,7 +175,8 @@ int main (int argc, char** argv){
 			for (i = 0; i < PADDLEHEIGHT; i++){
 				if ((ballrightedgex = rightpaddle->paddle.x) && (ballrightedgey = (rightpaddle->paddle.y+i ))){
 					ballen->speedx*=-1;
-				}	
+				}
+				i++;	
 			}
 			// ------------------- Hitting the LEFT PADDLE -----------------------
 			// Setting variables
@@ -185,7 +187,7 @@ int main (int argc, char** argv){
 			 	if ((ballleftedgex = leftpaddle->paddle.x+PADDLEWIDTH) && (ballleftedgey = (leftpaddle->paddle.y+t))){
 					ballen->speedx*=-1;
 				}
-				ballleftedgey++;
+				t++;
 			}
 		}
         // If no user provides any input, the paddles must still be drawn!
