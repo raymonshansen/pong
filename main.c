@@ -98,8 +98,6 @@ int main (int argc, char** argv){
 	    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
 	    // Clear the screen with the selected color
 	    SDL_RenderClear(renderer);
-	    // Set the color for the paddles
-	    SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
 
 	    // ------------------ MOVING RIGHTPADDLE UP -----------------
 
@@ -169,21 +167,23 @@ int main (int argc, char** argv){
 			// The ball should bounce back if it hits the "roof" or "floor"
 			if (ballen->bally>=(HEIGHT-ballen->radius) || ballen->bally<=(0+ballen->radius))
 				ballen->speedy*=-1;
-		//-------------- Checking for PADDLE collision -------------------
-		// If the CheckCollision function returns ONE, there is a
-		// collision and the speed should be reversed.
-		if(CheckCollision(ballen, rightpaddle)>0) 
-		   || CheckCollision(ballen, leftpaddle)>0){
-			ballen->speedx*=-1;
-		}
+			//-------------- Checking for PADDLE collision -------------------
+			// If the CheckCollision function returns ONE, there is a
+			// collision and the speed should be reversed.
+			if((CheckCollision(ballen, rightpaddle))>0){
+				ballen->speedx*=-1;
+			}
+			if(CheckCollision(ballen, leftpaddle)>0){
+				ballen->speedx*=-1;
+			}
 		}
         // If no user provides any input, the paddles must still be drawn!
         // Also, if there has been no collision, we draw paddles, ball and render.
         // Set the color for the paddles
-	    SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
+	    SDL_SetRenderDrawColor( renderer, 0, 255, 0, 0 );
         DrawPaddle(renderer, rightpaddle, leftpaddle);
         // Set the color for the ball
-	    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+	    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 0);
 	    DrawBall(renderer, ballen);
 	    // Updating screen with everything we have drawn...
 	    SDL_RenderPresent(renderer);
