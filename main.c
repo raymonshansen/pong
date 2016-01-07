@@ -94,7 +94,9 @@ int main (int argc, char** argv){
 	    	sjekk =1;
 	    	break;
 	    }
+	    // Set a color to fill the screen with
 	    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
+	    // Clear the screen with the selected color
 	    SDL_RenderClear(renderer);
 	    // Set the color for the paddles
 	    SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
@@ -167,36 +169,21 @@ int main (int argc, char** argv){
 			// The ball should bounce back if it hits the "roof" or "floor"
 			if (ballen->bally>=(HEIGHT-ballen->radius) || ballen->bally<=(0+ballen->radius))
 				ballen->speedy*=-1;
-			//-------------------- Hitting the RIGHT PADDLE ----------------------
-			// Setting variables
-			int ballrightedgex = ballen->ballx+ballen->radius;
-			int ballrightedgey = ballen->bally;
-			int i;
-			for (i = 0; i < PADDLEHEIGHT; i++){
-				if ((ballrightedgex = rightpaddle->paddle.x) && (ballrightedgey = (rightpaddle->paddle.y+i ))){
-					ballen->speedx*=-1;
-				}
-				i++;	
-			}
-			// ------------------- Hitting the LEFT PADDLE -----------------------
-			// Setting variables
-			int ballleftedgex = ballen->ballx-ballen->radius;
-			int ballleftedgey = ballen->bally;
-			int t;
-			for (t = 0; t < PADDLEHEIGHT; t++){
-			 	if ((ballleftedgex = leftpaddle->paddle.x+PADDLEWIDTH) && (ballleftedgey = (leftpaddle->paddle.y+t))){
-					ballen->speedx*=-1;
-				}
-				t++;
-			}
+		//-------------- Checking for PADDLE collision -------------------
+		// If the CheckCollision function returns ONE, there is a
+		// collision and the speed should be reversed.
+		if(CheckCollision(ballen, rightpaddle)>0) 
+		   || CheckCollision(ballen, leftpaddle)>0){
+			ballen->speedx*=-1;
+		}
 		}
         // If no user provides any input, the paddles must still be drawn!
+        // Also, if there has been no collision, we draw paddles, ball and render.
         // Set the color for the paddles
 	    SDL_SetRenderDrawColor( renderer, 0, 0, 255, 255 );
         DrawPaddle(renderer, rightpaddle, leftpaddle);
         // Set the color for the ball
 	    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-	    // Using my very own DrawCircle-function!!
 	    DrawBall(renderer, ballen);
 	    // Updating screen with everything we have drawn...
 	    SDL_RenderPresent(renderer);

@@ -1,5 +1,5 @@
-SOURCE = main.c ball.c paddle.c
-HEADER = ball.h paddle.h
+SOURCE = main.c ball.c paddle.c collision.c
+HEADER = ball.h paddle.h collision.h
 
 # Change this according to the type of system you are using
 all: app_linux

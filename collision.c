@@ -3,7 +3,14 @@
 #include <assert.h>
 #include <math.h>
 #include "ball.h"
+#include "paddle.h"
 
+	// Here's a little function that finds the shortest distance squared.
+	double DistanceSquared(int x1, int y1, int x2, int y2){
+		int deltax = x2 - x1;
+		int deltay = y2 - y1;
+		return deltax*deltax + deltay*deltay;
+	}
 /*  
 	This function takes in a pointer to the ball and
 	a pointer to a paddle, more spesifically the SDL_Rect
@@ -12,7 +19,7 @@
 	If this distance is LESS than the radius of the ball,
 	a collision has occured and it's speed should be reversed.
 */
-void CheckCollision(ball_t *ball, player_t *box){
+int CheckCollision(ball_t *ball, player_t *box){
 	// Defining the closest x-coordinate on the collision box.
 	int closestx, closesty;
 
@@ -39,17 +46,11 @@ void CheckCollision(ball_t *ball, player_t *box){
 	}
 	// If the ball is below the bottom of the box.
 	else if(ball->bally > box->paddle.y + box->paddle.h){
-		closesty = box->paddle.y + box->paddle.h
+		closesty = box->paddle.y + box->paddle.h;
 	}
 	// Lastly it can be between or inside the box edges.
 	else{
 		closesty = ball->bally;
-	}
-	// Here's a little function that finds the shortest distance squared.
-	double DistanceSquared(int x1, int y1, int x2 int y2){
-		int deltax = x2 - x1;
-		int deltay = y2 - y1;
-		return deltax*deltax + deltay*deltay;
 	}
 	// If the shortest distance squared is LESS than the radius of the 
 	// ball squared, they must have collided!
