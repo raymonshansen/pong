@@ -63,42 +63,38 @@ int main (int argc, char** argv){
 
 //-------------------------------------- Ball Creation ---------------------------------------
     // Creates a ball called "ballen" 
-    ball_t *ballen = ballstart(600, 300, 20);
+    ball_t *ballen = ballstart(600, 300, 30);
 
     if(ballen == NULL){
     	printf("Fatal error in creation of ball!\n");
     }
 //-------------------------------------- Keyboard checks -------------------------------------
 	// Variable to escape the Keyboard loop.
-	int sjekk = 0;
+	int gameloop = 0;
 	// Name of event to check for is "e"
 	SDL_Event e;
 	// Pointer to the keyboard array
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
 	// Variable to determine if ball should move or not.
 	int ballmove = 0;
+	// Variable to determine if the ball should be deleted before a new 
+	// can be created. 
+	int upfordestruction = 0;
+	int ballisdestroyed = 0;
 
-	while(!sjekk){
-		while( SDL_PollEvent( &e ) != 0 ){
-	        //User requests quit
-	        if( e.type == SDL_QUIT ){
-	            sjekk = 1;
-	        }
-	    }
-
-		if (state[SDL_SCANCODE_Q]){
-	        sjekk = 1;
-	        break;
-	    }
-	    if(state[SDL_SCANCODE_ESCAPE]){
-	    	sjekk =1;
-	    	break;
-	    }
+	// ---------------------- MAIN GAME LOOP! ----------------------
+	while(!gameloop){
+		
 	    // Set a color to fill the screen with
 	    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
 	    // Clear the screen with the selected color
 	    SDL_RenderClear(renderer);
-
+	    if (upfordestruction == 1){
+	    	DestroyBall(ballen);
+	    	ballisdestroyed = 1;
+	    	upfordestruction = 0;
+	    	printf("Ball is destroyed\n");
+	    }
 	    // ------------------ MOVING RIGHTPADDLE UP -----------------
 
 	    if (state[SDL_SCANCODE_UP]){
@@ -157,13 +153,32 @@ int main (int argc, char** argv){
 
 	    //-------------- Handling ball movement -------------------------
 	    // Ball does not start moving untill user pushes "I"
-	    if (state[SDL_SCANCODE_I]){
-	    	ballmove = 1;	
+	    if ((state[SDL_SCANCODE_I]) && ballisdestroyed == 0){
+	    	ballmove = 1;
+	    	printf("Ball is moving!\n");
 	    }
-	    if (ballmove != 0){
+	    if ((state[SDL_SCANCODE_I]) && ballisdestroyed == 1){
+	    	// TODO:
+	    	// Print: "WAITING FOR NEW BALL!" or something.
+	    	printf("Waiting for new ball!\n");
+	    }
+
+	    // If the ball is destroyed, create a new one by pressing "N".
+	    if ((state[SDL_SCANCODE_N]) && ballisdestroyed == 1){
+	    	// Creates a ball called "ballen" 
+    		ball_t *ballen = ballstart(600, 300, 30);
+
+    		if(ballen == NULL){
+    		printf("Fatal error in creation of ball!\n");
+    		}
+    		ballisdestroyed = 0;
+    		printf("New ball created! :)\n");
+	    }
+
+	    if (ballmove == 1){
 		    ballen->ballx+=ballen->speedx;
 			ballen->bally+=ballen->speedy;
-			// The ball should disappear if it goes off either edge of the window...
+				
 			// The ball should bounce back if it hits the "roof" or "floor"
 			if (ballen->bally>=(HEIGHT-ballen->radius) || ballen->bally<=(0+ballen->radius))
 				ballen->speedy*=-1;
@@ -176,24 +191,45 @@ int main (int argc, char** argv){
 			if(CheckCollision(ballen, leftpaddle)>0){
 				ballen->speedx*=-1;
 			}
+			if(ballen->ballx>(WIDTH+ballen->radius) || ballen->ballx<(0-ballen->radius)){
+				ballmove = 0;
+				upfordestruction = 1;
+			}
+			// Set the color for the ball
+	    	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
+	    	DrawBall(renderer, ballen);
+	    	printf("Ball is drawn!\n");
 		}
+		while( SDL_PollEvent( &e ) != 0 ){
+	        //User requests quit
+	        if( e.type == SDL_QUIT ){
+	            gameloop = 1;
+	        }
+	    }
+
+		if (state[SDL_SCANCODE_Q]){
+	        gameloop = 1;
+	        break;
+	    }
+	    if(state[SDL_SCANCODE_ESCAPE]){
+	    	gameloop =1;
+	    	break;
+	    }
+		
         // If no user provides any input, the paddles must still be drawn!
         // Also, if there has been no collision, we draw paddles, ball and render.
         // Set the color for the paddles
-	    SDL_SetRenderDrawColor( renderer, 0, 255, 0, 0 );
+	    SDL_SetRenderDrawColor( renderer, 0, 255, 50, 0 );
         DrawPaddle(renderer, rightpaddle, leftpaddle);
-        // Set the color for the ball
-	    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 0);
-	    DrawBall(renderer, ballen);
 	    // Updating screen with everything we have drawn...
 	    SDL_RenderPresent(renderer);
+		// The ball should disappear if it goes off either edge of the window...
+		
 	}
 	// Removing paddles 
     Destroy_player(leftpaddle);
 
     Destroy_player(rightpaddle);
-    
-    DestroyBall(ballen);
 
 	SDL_DestroyRenderer(renderer);
 
