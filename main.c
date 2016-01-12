@@ -5,6 +5,7 @@
 #include "ball.h"
 #include "paddle.h"
 #include "collision.h"
+#include <assert.h>
 
 #define WIDTH 1200
 #define HEIGHT 700
@@ -63,7 +64,7 @@ int main (int argc, char** argv){
 
 //-------------------------------------- Ball Creation ---------------------------------------
     // Creates a ball called "ballen" 
-    ball_t *ballen = ballstart(600, 300, 30);
+    ball_t *ballen = ballstart(WIDTH/2, HEIGHT/3, 30);
 
     if(ballen == NULL){
     	printf("Fatal error in creation of ball!\n");
@@ -77,10 +78,6 @@ int main (int argc, char** argv){
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
 	// Variable to determine if ball should move or not.
 	int ballmove = 0;
-	// Variable to determine if the ball should be deleted before a new 
-	// can be created. 
-	int upfordestruction = 0;
-	int ballisdestroyed = 0;
 
 	// ---------------------- MAIN GAME LOOP! ----------------------
 	while(!gameloop){
@@ -89,12 +86,7 @@ int main (int argc, char** argv){
 	    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
 	    // Clear the screen with the selected color
 	    SDL_RenderClear(renderer);
-	    if (upfordestruction == 1){
-	    	DestroyBall(ballen);
-	    	ballisdestroyed = 1;
-	    	upfordestruction = 0;
-	    	printf("Ball is destroyed\n");
-	    }
+	    
 	    // ------------------ MOVING RIGHTPADDLE UP -----------------
 
 	    if (state[SDL_SCANCODE_UP]){
@@ -153,26 +145,17 @@ int main (int argc, char** argv){
 
 	    //-------------- Handling ball movement -------------------------
 	    // Ball does not start moving untill user pushes "I"
-	    if ((state[SDL_SCANCODE_I]) && ballisdestroyed == 0){
+	    if (state[SDL_SCANCODE_I]){
 	    	ballmove = 1;
 	    	printf("Ball is moving!\n");
 	    }
-	    if ((state[SDL_SCANCODE_I]) && ballisdestroyed == 1){
-	    	// TODO:
-	    	// Print: "WAITING FOR NEW BALL!" or something.
-	    	printf("Waiting for new ball!\n");
-	    }
 
-	    // If the ball is destroyed, create a new one by pressing "N".
-	    if ((state[SDL_SCANCODE_N]) && ballisdestroyed == 1){
-	    	// Creates a ball called "ballen" 
-    		ball_t *ballen = ballstart(600, 300, 30);
-
-    		if(ballen == NULL){
-    		printf("Fatal error in creation of ball!\n");
-    		}
-    		ballisdestroyed = 0;
-    		printf("New ball created! :)\n");
+	    // "Create" a new one by pressing "N".
+	    if (state[SDL_SCANCODE_N]){
+	    	// Move the ball back to the starting-piont!
+    		ballen->ballx=(WIDTH/2);
+    		ballen->bally=(HEIGHT/3);
+    		balloffscreen = 0;
 	    }
 
 	    if (ballmove == 1){
@@ -191,15 +174,24 @@ int main (int argc, char** argv){
 			if(CheckCollision(ballen, leftpaddle)>0){
 				ballen->speedx*=-1;
 			}
-			if(ballen->ballx>(WIDTH+ballen->radius) || ballen->ballx<(0-ballen->radius)){
+			if(ballen->ballx>(WIDTH+ballen->radius)){
 				ballmove = 0;
-				upfordestruction = 1;
+				balloffscreen = 1;
+				ballen->ballx=(WIDTH/2);
+    			ballen->bally=(HEIGHT/3);
 			}
+
+			if(ballen->ballx<(0-ballen->radius)){
+				ballmove = 0;
+				balloffscreen = 1;
+				ballen->ballx=(WIDTH/2);
+    			ballen->bally=(HEIGHT/3);
+			}
+	    	
+		}
 			// Set the color for the ball
 	    	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
 	    	DrawBall(renderer, ballen);
-	    	printf("Ball is drawn!\n");
-		}
 		while( SDL_PollEvent( &e ) != 0 ){
 	        //User requests quit
 	        if( e.type == SDL_QUIT ){
