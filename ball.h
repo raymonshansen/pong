@@ -13,6 +13,8 @@ struct ball {
 
 ball_t *ballstart(int ballx, int bally, int radius);
 
+void DrawFilledBall(SDL_Renderer *renderer, ball_t *b2);
+
 void DrawBall(SDL_Renderer *renderer, ball_t *b1);
 
 void DestroyBall(ball_t *b);

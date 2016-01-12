@@ -155,7 +155,6 @@ int main (int argc, char** argv){
 	    	// Move the ball back to the starting-piont!
     		ballen->ballx=(WIDTH/2);
     		ballen->bally=(HEIGHT/3);
-    		balloffscreen = 0;
 	    }
 
 	    if (ballmove == 1){
@@ -176,14 +175,12 @@ int main (int argc, char** argv){
 			}
 			if(ballen->ballx>(WIDTH+ballen->radius)){
 				ballmove = 0;
-				balloffscreen = 1;
 				ballen->ballx=(WIDTH/2);
     			ballen->bally=(HEIGHT/3);
 			}
 
 			if(ballen->ballx<(0-ballen->radius)){
 				ballmove = 0;
-				balloffscreen = 1;
 				ballen->ballx=(WIDTH/2);
     			ballen->bally=(HEIGHT/3);
 			}
@@ -191,7 +188,7 @@ int main (int argc, char** argv){
 		}
 			// Set the color for the ball
 	    	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-	    	DrawBall(renderer, ballen);
+	    	DrawFilledBall(renderer, ballen);
 		while( SDL_PollEvent( &e ) != 0 ){
 	        //User requests quit
 	        if( e.type == SDL_QUIT ){

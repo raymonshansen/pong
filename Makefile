@@ -1,4 +1,4 @@
-SOURCE = main.c ball.c paddle.c collision.c
+SOURCE = main.c ball.c paddle.c collision.c filledball.c
 HEADER = ball.h paddle.h collision.h
 
 # Change this according to the type of system you are using
