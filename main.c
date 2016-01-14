@@ -7,10 +7,11 @@
 #include "collision.h"
 #include <assert.h>
 
-#define WIDTH 1200
-#define HEIGHT 700
+#define WIDTH 1340
+#define HEIGHT 760
 #define PADDLEWIDTH 10
-#define PADDLEHEIGHT 150
+#define PADDLEHEIGHT 350
+#define FPS 30
 
 int main (int argc, char** argv){
 //------------------------------------- Main Window Creation -----------------------------------            
@@ -21,7 +22,8 @@ int main (int argc, char** argv){
         	SDL_WINDOWPOS_UNDEFINED,
         	WIDTH,
         	HEIGHT,
-        	SDL_WINDOW_SHOWN
+        	//SDL_WINDOW_SHOWN
+        	SDL_WINDOW_FULLSCREEN
     	);
 
 	// Setup renderer
@@ -64,7 +66,7 @@ int main (int argc, char** argv){
 
 //-------------------------------------- Ball Creation ---------------------------------------
     // Creates a ball called "ballen" 
-    ball_t *ballen = ballstart(WIDTH/2, HEIGHT/3, 30);
+    ball_t *ballen = ballstart(WIDTH/2, HEIGHT/3, 50);
 
     if(ballen == NULL){
     	printf("Fatal error in creation of ball!\n");
@@ -78,10 +80,12 @@ int main (int argc, char** argv){
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
 	// Variable to determine if ball should move or not.
 	int ballmove = 0;
+	Uint32 start;
+
 
 	// ---------------------- MAIN GAME LOOP! ----------------------
 	while(!gameloop){
-		
+		start = SDL_GetTicks();
 	    // Set a color to fill the screen with
 	    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
 	    // Clear the screen with the selected color
@@ -213,7 +217,9 @@ int main (int argc, char** argv){
 	    // Updating screen with everything we have drawn...
 	    SDL_RenderPresent(renderer);
 		// The ball should disappear if it goes off either edge of the window...
-		
+		if((1000/FPS)>(SDL_GetTicks()-start)){
+			SDL_Delay((1000/FPS)-(SDL_GetTicks()-start));
+		}
 	}
 	// Removing paddles 
     Destroy_player(leftpaddle);
