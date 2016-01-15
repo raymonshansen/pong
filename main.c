@@ -6,12 +6,15 @@
 #include "paddle.h"
 #include "collision.h"
 #include <assert.h>
+#include <SDL2/SDL_ttf.h>
 
 #define WIDTH 1340
 #define HEIGHT 760
 #define PADDLEWIDTH 10
-#define PADDLEHEIGHT 350
-#define FPS 30
+#define PADDLEHEIGHT 150
+#define FPS 380
+#define texW 50
+#define texH 50
 
 int main (int argc, char** argv){
 //------------------------------------- Main Window Creation -----------------------------------            
@@ -22,13 +25,23 @@ int main (int argc, char** argv){
         	SDL_WINDOWPOS_UNDEFINED,
         	WIDTH,
         	HEIGHT,
-        	//SDL_WINDOW_SHOWN
-        	SDL_WINDOW_FULLSCREEN
+        	SDL_WINDOW_SHOWN
+        	//SDL_WINDOW_FULLSCREEN
     	);
+
+    // Starting Text-library for SDL
+    TTF_Init();
 
 	// Setup renderer
 	SDL_Renderer *renderer = NULL;
 	renderer =  SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED);
+
+	//Setting font
+	TTF_Font * font = TTF_OpenFont("FreeMonoBold.ttf", 25);
+	SDL_Color color = { 0, 255, 0 };
+	SDL_Surface * surface = TTF_RenderText_Solid(font,
+ 	"3", color);
+ 	SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
 
 	// Set render color to black ( background will be rendered in this color )
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
@@ -66,11 +79,17 @@ int main (int argc, char** argv){
 
 //-------------------------------------- Ball Creation ---------------------------------------
     // Creates a ball called "ballen" 
-    ball_t *ballen = ballstart(WIDTH/2, HEIGHT/3, 50);
+    ball_t *ballen = ballstart(WIDTH/2, HEIGHT/3, PADDLEWIDTH*2);
 
     if(ballen == NULL){
     	printf("Fatal error in creation of ball!\n");
     }
+
+//-------------------------------------- score creation ---------------------------------------
+    // Boxes to contain the score
+    SDL_Rect rightscore = { (WIDTH/2)+PADDLEHEIGHT, PADDLEWIDTH, texW, texH };
+    SDL_Rect leftscore = { (WIDTH/2)-PADDLEHEIGHT-texW, PADDLEWIDTH, texW, texH };
+
 //-------------------------------------- Keyboard checks -------------------------------------
 	// Variable to escape the Keyboard loop.
 	int gameloop = 0;
@@ -214,6 +233,9 @@ int main (int argc, char** argv){
         // Set the color for the paddles
 	    SDL_SetRenderDrawColor( renderer, 0, 255, 50, 0 );
         DrawPaddle(renderer, rightpaddle, leftpaddle);
+        // Text on screen!
+        SDL_RenderCopy(renderer, texture, NULL, &rightscore);
+        SDL_RenderCopy(renderer, texture, NULL, &leftscore);
 	    // Updating screen with everything we have drawn...
 	    SDL_RenderPresent(renderer);
 		// The ball should disappear if it goes off either edge of the window...
@@ -226,10 +248,19 @@ int main (int argc, char** argv){
 
     Destroy_player(rightpaddle);
 
+    TTF_CloseFont(font);
+
+    TTF_Quit();
+
+    SDL_DestroyTexture(texture);
+	
+	SDL_FreeSurface(surface);
+	
 	SDL_DestroyRenderer(renderer);
 
     // Clean up SDL2 and exit the program
     SDL_DestroyWindow(window);
+
 
     SDL_Quit();
     return 0;

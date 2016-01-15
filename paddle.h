@@ -3,7 +3,7 @@
 
 typedef struct player player_t;
 struct player { 
-	SDL_Rect paddle;
+	SDL_Rect paddle, rightscore, leftscore;
 	int win;
 	int loss;
 	int speed;
