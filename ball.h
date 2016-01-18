@@ -5,8 +5,8 @@ typedef struct ball ball_t;
 struct ball {
 	int ballx;
 	int bally;
-	int speedx;
-	int speedy;
+	float speedx;
+	float speedy;
 	int radius;
 };
 

@@ -26,7 +26,7 @@ int main (int argc, char** argv){
         	WIDTH,
         	HEIGHT,
         	SDL_WINDOW_SHOWN
-        	//SDL_WINDOW_FULLSCREEN
+        	//SDL_WINDOW_FULLSCREENls
     	);
 
     // Starting Text-library for SDL
@@ -37,12 +37,20 @@ int main (int argc, char** argv){
 	renderer =  SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED);
 
 	//Setting font
-	TTF_Font * font = TTF_OpenFont("FreeMonoBold.ttf", 25);
+	TTF_Font *font = TTF_OpenFont("FreeMonoBold.ttf", 25);
 	SDL_Color color = { 0, 255, 0 };
-	SDL_Surface * surface = TTF_RenderText_Solid(font,
- 	"3", color);
- 	SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
 
+	// Making one scoringsurface for each player
+	// They will be changed in the gameloop as the game progresses
+	SDL_Surface *leftscoresurface = NULL;
+	
+	SDL_Surface *rightscoresurface = NULL;
+	
+	// Making one texture from each of the above surfaces
+ 	SDL_Texture *lefttexture = NULL;
+ 	
+ 	SDL_Texture *righttexture = NULL;
+ 	
 	// Set render color to black ( background will be rendered in this color )
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
 
@@ -87,8 +95,28 @@ int main (int argc, char** argv){
 
 //-------------------------------------- score creation ---------------------------------------
     // Boxes to contain the score
-    SDL_Rect rightscore = { (WIDTH/2)+PADDLEHEIGHT, PADDLEWIDTH, texW, texH };
-    SDL_Rect leftscore = { (WIDTH/2)-PADDLEHEIGHT-texW, PADDLEWIDTH, texW, texH };
+    SDL_Rect rightscorebox = { (WIDTH/2)+PADDLEHEIGHT, PADDLEWIDTH, texW, texH };
+    SDL_Rect leftscorebox = { (WIDTH/2)-PADDLEHEIGHT-texW, PADDLEWIDTH, texW, texH };
+
+    // Variable to determine scoring, declared here because they need to be
+	// casted into their respective surface-pointers...
+	char leftscore [50];
+	char rightscore [50];
+    
+    int leftplayerscore = 0;
+    int rightplayerscore = 0;
+
+    sprintf(leftscore, "%d", leftplayerscore);
+    sprintf(rightscore, "%d", rightplayerscore);
+
+    // Scoring on screen!
+    
+	leftscoresurface = TTF_RenderText_Solid(font, leftscore, color);
+	lefttexture = SDL_CreateTextureFromSurface(renderer, leftscoresurface);
+
+	rightscoresurface = TTF_RenderText_Solid(font, rightscore, color);
+	righttexture = SDL_CreateTextureFromSurface(renderer, rightscoresurface);
+
 
 //-------------------------------------- Keyboard checks -------------------------------------
 	// Variable to escape the Keyboard loop.
@@ -100,10 +128,12 @@ int main (int argc, char** argv){
 	// Variable to determine if ball should move or not.
 	int ballmove = 0;
 	Uint32 start;
+	
 
 
 	// ---------------------- MAIN GAME LOOP! ----------------------
 	while(!gameloop){
+		
 		start = SDL_GetTicks();
 	    // Set a color to fill the screen with
 	    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 );
@@ -170,7 +200,6 @@ int main (int argc, char** argv){
 	    // Ball does not start moving untill user pushes "I"
 	    if (state[SDL_SCANCODE_I]){
 	    	ballmove = 1;
-	    	printf("Ball is moving!\n");
 	    }
 
 	    // "Create" a new one by pressing "N".
@@ -178,34 +207,83 @@ int main (int argc, char** argv){
 	    	// Move the ball back to the starting-piont!
     		ballen->ballx=(WIDTH/2);
     		ballen->bally=(HEIGHT/3);
+    		leftplayerscore = 0;
+    		rightplayerscore = 0;
 	    }
 
 	    if (ballmove == 1){
 		    ballen->ballx+=ballen->speedx;
 			ballen->bally+=ballen->speedy;
 				
-			// The ball should bounce back if it hits the "roof" or "floor"
-			if (ballen->bally>=(HEIGHT-ballen->radius) || ballen->bally<=(0+ballen->radius))
-				ballen->speedy*=-1;
+			// The ball should bounce back if it hits the "floor" 
+			if (ballen->bally>=(HEIGHT-ballen->radius)){
+				ballen->speedy*=-1.0;
+			}
+				
+			// or "roof"
+			if(ballen->bally<=(0+ballen->radius)){
+				ballen->speedy*=-1.0;
+			}
+				
 			//-------------- Checking for PADDLE collision -------------------
 			// If the CheckCollision function returns ONE, there is a
 			// collision and the speed should be reversed.
-			if((CheckCollision(ballen, rightpaddle))>0){
-				ballen->speedx*=-1;
+
+			// ---------- RIGHT PADDLE COLLISION CHECK------------------------
+			if((CheckCollision(ballen, rightpaddle))==1){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.05;
 			}
-			if(CheckCollision(ballen, leftpaddle)>0){
-				ballen->speedx*=-1;
+			if((CheckCollision(ballen, rightpaddle))==2){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.02;
 			}
+			if((CheckCollision(ballen, rightpaddle))==3){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.02;
+			}
+			if((CheckCollision(ballen, rightpaddle))==4){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.05;
+			}
+			//--------- LEFT PADDLE COLLISION CHECK ------------------------
+			if(CheckCollision(ballen, leftpaddle)==1){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.05;
+			}
+			if(CheckCollision(ballen, leftpaddle)==2){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.02;
+			}
+			if(CheckCollision(ballen, leftpaddle)==3){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.02;
+			}
+			if(CheckCollision(ballen, leftpaddle)==4){
+				ballen->speedx*=-1.01;
+				ballen->speedy*=1.05;
+			}
+			//------------- IF the ball goes off the right side -----------
 			if(ballen->ballx>(WIDTH+ballen->radius)){
 				ballmove = 0;
 				ballen->ballx=(WIDTH/2);
     			ballen->bally=(HEIGHT/3);
+    			leftplayerscore++;
+    			sprintf(leftscore, "%d", leftplayerscore);
+    			leftscoresurface = TTF_RenderText_Solid(font, leftscore, color);
+    			lefttexture = SDL_CreateTextureFromSurface(renderer, leftscoresurface);
 			}
 
+			//------------ IF the ball goes off the left side -------------
 			if(ballen->ballx<(0-ballen->radius)){
 				ballmove = 0;
 				ballen->ballx=(WIDTH/2);
     			ballen->bally=(HEIGHT/3);
+    			rightplayerscore++;
+				sprintf(rightscore, "%d", rightplayerscore);
+    			rightscoresurface = TTF_RenderText_Solid(font, rightscore, color);
+    			righttexture = SDL_CreateTextureFromSurface(renderer, rightscoresurface);
+
 			}
 	    	
 		}
@@ -233,9 +311,9 @@ int main (int argc, char** argv){
         // Set the color for the paddles
 	    SDL_SetRenderDrawColor( renderer, 0, 255, 50, 0 );
         DrawPaddle(renderer, rightpaddle, leftpaddle);
-        // Text on screen!
-        SDL_RenderCopy(renderer, texture, NULL, &rightscore);
-        SDL_RenderCopy(renderer, texture, NULL, &leftscore);
+        
+        SDL_RenderCopy(renderer, lefttexture, NULL, &leftscorebox);
+        SDL_RenderCopy(renderer, righttexture, NULL, &rightscorebox);
 	    // Updating screen with everything we have drawn...
 	    SDL_RenderPresent(renderer);
 		// The ball should disappear if it goes off either edge of the window...
@@ -252,9 +330,11 @@ int main (int argc, char** argv){
 
     TTF_Quit();
 
-    SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(lefttexture);
+    SDL_DestroyTexture(righttexture);
 	
-	SDL_FreeSurface(surface);
+	SDL_FreeSurface(rightscoresurface);
+	SDL_FreeSurface(leftscoresurface);
 	
 	SDL_DestroyRenderer(renderer);
 

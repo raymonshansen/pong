@@ -56,7 +56,19 @@ int CheckCollision(ball_t *ball, player_t *box){
 	// ball squared, they must have collided!
 	if(DistanceSquared(ball->ballx, ball->bally, closestx, closesty) < ball->radius*ball->radius){
 		// The ball HAS collided with the input box!
-		return 1;
+		// Now we need to know WHERE on the box it collided...
+		if((closestx > box->paddle.x) && (closestx < box->paddle.x + (box->paddle.h/4)))
+		// The ball hit the top quarter of the paddle	
+			return 1;
+		if((closestx > box->paddle.x + (box->paddle.h/4)) && closestx < box->paddle.x + (box->paddle.h/2))
+		// The ball hit the second top quarter of the paddle
+			return 2;
+		if((closestx > box->paddle.x + (box->paddle.h/2)) && closestx < box->paddle.x + (3*(box->paddle.h/2)))
+		// The ball hit the second lowest quarter of the paddle
+			return 3;
+		if(closestx > box->paddle.x + (3*(box->paddle.h/2)) && closestx < box->paddle.x + box->paddle.h)
+		// The ball hit the lowest quarter of the paddle
+			return 4;
 	}
 	// The ball has NOT collided with the input box!
 	return 0;
